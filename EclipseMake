@@ -1,0 +1,6 @@
+#!/bin/bash
+
+args=("$@")
+
+cd build/$1
+cmake ../../src/$1 -DCMAKE_INSTALL_PREFIX=../../install -DCATKIN_DEVEL_PREFIX=../../devel -G"Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j8

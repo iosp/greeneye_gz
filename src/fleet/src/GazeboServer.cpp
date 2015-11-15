@@ -177,10 +177,10 @@ void GazeboServer::TestFunction ()
 
 	//std_srvs::EmptyRequest req;
 
-	std_msgs::Header req();
-	std_msgs::Header res();
+	//std_msgs::Header req();
+	//std_msgs::Header res();
 
-	ros::service::call("/uav1/shutdown", req, res);
+	//ros::service::call("/uav1/shutdown", req, res);
 	//ros::ServiceClient client = m_NodeHandler.serviceClient("/uav1/shutdown");
 
 
