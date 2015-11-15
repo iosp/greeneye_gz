@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+
+<launch>
+<include file="$(find fleet_worlds)/launch/start.launch"/> 
+   <arg name="model" default="$(find hector_quadrotor_description)/urdf/quadrotor.gazebo.xacro" />
+
+   <!-- workaround https://github.com/ros-simulation/gazebo_ros_pkgs/pull/134 -->
+   <!-- <param name="robot_description" command="$(find xacro)/xacro.py '$(arg model)'" /> -->
+<!--
+ <include file="$(find quadrotor_model)/launch/
+-->
+
+<node pkg="fleet" type="gazebo_server_node" name="platform" args="2"/> 
+
+	<group ns="uav1">
+     <include file="$(find quadrotor_model)/launch/spawn_quadrotor.launch">
+       <arg name="name" value="uav1" />
+       <arg name="tf_prefix" value="uav1" />
+       <arg name="model" value="$(arg model)" />
+	<arg name="x" value="0" />
+       <arg name="y" value="0" />
+     </include>
+   </group>
+
+  
+   <group ns="uav2">
+     <include file="$(find quadrotor_model)/launch/spawn_quadrotor.launch">
+       <arg name="name" value="uav2" />
+       <arg name="tf_prefix" value="uav2" />
+       <arg name="model" value="$(arg model)" />
+	<arg name="x" value="0" />
+       <arg name="y" value="1" />
+     </include>
+   </group>
+
+<!--
+   <group ns="uav2">
+     <include file="$(find quadrotor_model)/launch/spawn_quadrotor_with_downward_cam.launch">
+       <arg name="name" value="uav2" />
+       <arg name="tf_prefix" value="uav2" />
+       <arg name="model" value="$(arg model)" />
+	<arg name="x" value="1" />
+       <arg name="y" value="1" />
+     </include>
+   </group>
+
+<group ns="uav3">
+     <include file="$(find quadrotor_model)/launch/spawn_quadrotor_with_downward_cam.launch">
+       <arg name="name" value="uav3" />
+       <arg name="tf_prefix" value="uav3" />
+       <arg name="model" value="$(arg model)" />
+	<arg name="x" value="1" />
+       <arg name="y" value="0" />
+     </include>
+   </group>
+
+-->
+
+
+
+</launch>
+

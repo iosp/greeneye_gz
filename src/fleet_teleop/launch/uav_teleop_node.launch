@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+
+<!-- 
+DF 6/7/15 Test remap ability - 
+Run Node uav1_teleop_node + remap to uav1 (cmd_vel publisher)
+-->
+
+<launch>      
+ <!-- Temp removed:
+  <node name="uav_teleop_node0" pkg="fleet_teleop" type="uav_teleop_node" 
+-->
+<group ns="uav0">
+	<node name="uav_teleop" pkg="fleet_teleop" type="uav_teleop_node" 
+	args="0"   	
+     	respawn="false" output="screen">
+   </node>
+</group>
+
+<!--
+<group ns="uav1">
+  <node name="uav_teleop" pkg="fleet_teleop" type="uav_teleop_node" 
+	 args="1"   
+      	respawn="false" output="screen">	
+   </node>
+</group>
+-->
+   
+</launch>

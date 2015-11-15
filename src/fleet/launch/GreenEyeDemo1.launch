@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+
+<!-- 	
+	1. Upload world
+	2. Create 10 platforms with ge_platform node
+-->
+
+<launch>
+<include file="$(find fleet_worlds)/launch/start.launch"/> 
+   <arg name="model" default="$(find hector_quadrotor_description)/urdf/quadrotor.gazebo.xacro" />
+
+<!--
+<node pkg="fleet" type="gazebo_server_node" name="fleet_server" args="10"/>
+-->
+<node pkg="fleet" type="gazebo_server_node" name="platform" args="10"/> 
+
+<include file="$(find ge_platform)/launch/create_platform.launch"> 
+	<arg name="id" value="1" />
+	<arg name="x" value="1" />
+   	<arg name="y" value="0" />
+	<arg name="RunNode" value = "1" />
+</include>
+<include file="$(find ge_platform)/launch/create_platform.launch"> 
+	<arg name="id" value="2" />
+	<arg name="x" value="2" />
+   	<arg name="y" value="0" />
+	<arg name="RunNode" value = "1" />
+</include>
+<include file="$(find ge_platform)/launch/create_platform.launch"> 
+	<arg name="id" value="3" />
+	<arg name="x" value="0" />
+   	<arg name="y" value="1" />
+	<arg name="RunNode" value = "1" />
+</include>
+<include file="$(find ge_platform)/launch/create_platform.launch"> 
+	<arg name="id" value="4" />
+	<arg name="x" value="1" />
+   	<arg name="y" value="1" />
+	<arg name="RunNode" value = "1" />
+</include>
+<include file="$(find ge_platform)/launch/create_platform.launch"> 
+	<arg name="id" value="5" />
+	<arg name="x" value="2" />
+   	<arg name="y" value="1" />
+	<arg name="RunNode" value = "1" />
+</include>
+<include file="$(find ge_platform)/launch/create_platform.launch"> 
+	<arg name="id" value="6" />
+	<arg name="x" value="0" />
+   	<arg name="y" value="2" />
+	<arg name="RunNode" value = "1" />
+</include>
+<include file="$(find ge_platform)/launch/create_platform.launch"> 
+	<arg name="id" value="7" />
+	<arg name="x" value="1" />
+   	<arg name="y" value="2" />
+	<arg name="RunNode" value = "1" />
+</include>
+<include file="$(find ge_platform)/launch/create_platform.launch"> 
+	<arg name="id" value="8" />
+	<arg name="x" value="2" />
+   	<arg name="y" value="2" />
+	<arg name="RunNode" value = "1" />
+</include>
+<include file="$(find ge_platform)/launch/create_platform.launch"> 
+	<arg name="id" value="9" />
+	<arg name="x" value="3" />
+   	<arg name="y" value="2" />
+	<arg name="RunNode" value = "1" />
+</include>
+<include file="$(find ge_platform)/launch/create_platform.launch"> 
+	<arg name="id" value="10" />
+	<arg name="x" value="0" />
+   	<arg name="y" value="0" />
+	<arg name="RunNode" value = "1" />
+</include>
+ 
+
+</launch>
+

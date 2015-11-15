@@ -1,0 +1,40 @@
+*******************	
+Create/Edit package
+*******************
+
+# enter the workspace\src directory and type:
+	$ catkin_create_pkg <package name> <depend1> <depend2> "
+	depend1 <- roscpp
+	$ "catkin_make"
+	$ source 
+# in CMakeLists.txt - edit the following lines:
+	$ "add_executable(<node name> src/<cpp (with main()>
+	$ "target_link_libraries (<node name> ..."
+# in case of using another .cpp files:
+	$ add_library (<lib name> src/<cpp file>)
+	$ target_link_libraries (<node name> ... <lib name>)
+
+
+************
+Eclipse
+************
+# from:	http://answers.ros.org/question/52013/catkin-and-eclipse/
+	http://wiki.ros.org/IDEs
+
+   $ cd \build\package directory:
+   $ cmake ../../src/<package name> -DCMAKE_INSTALL_PREFIX=../../install -DCATKIN_DEVEL_PREFIX=../../devel 		-G"Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_ECLIPSE_MAKE_ARGUMENTS=-j8
+#in eclipse:
+	# Import projects -> Existing Projects into WS
+	# select root directory : ws/build
+	# check the request project from list
+	# Debug configuration->
+		c/c++ Application: /ws/devel/lib/<package>/<node>
+	# Properties -> c/c++ Make Project -> Environment:
+		- ROS_ROOT
+		- ROS_PACKAGE_PATH
+		- PYTHONPATH
+		- PATH
+	# Run -> Run configuration... -> c/c++ Application -> Environment:
+		- ROS_ROOT, /opt/ros/indigo/share/ros
+		- ROS_MASTER_URI, http://localhost:11311
+

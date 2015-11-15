@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+
+<!--
+Create platform with/without Logic that control the platform from fleetcontroller
+parameters:
+- id
+- x, y
+- 
+-->
+<launch>
+  
+   <arg name="model" default="$(find hector_quadrotor_description)/urdf/quadrotor.gazebo.xacro" />
+   <arg name="id" />
+   <arg name="x" default="$(arg id)"/>
+   <arg name="y" default="0"/>
+   <arg name="RunNode" default = "0"/>
+
+   <!-- workaround https://github.com/ros-simulation/gazebo_ros_pkgs/pull/134 -->
+   <!-- <param name="robot_description" command="$(find xacro)/xacro.py '$(arg model)'" /> -->
+
+<group ns="uav$(arg id)">
+     <include file="$(find quadrotor_model)/launch/spawn_quadrotor.launch">
+       <arg name="name" value="uav$(arg id)" />
+       <arg name="tf_prefix" value="uav" />
+       <arg name="model" value="$(arg model)" />
+	<arg name="x" value="$(arg x)" />
+       <arg name="y" value="$(arg y)" />
+     </include>
+	<group if="$(arg RunNode)">
+		<node pkg="ge_platform" type="ge_platform_node" name="platform" args="$(arg id)"/> 
+	</group>
+</group>
+
+   
+</launch>
+

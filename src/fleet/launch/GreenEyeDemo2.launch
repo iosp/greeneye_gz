@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+
+<!-- 	
+	1. Upload world
+	2. Create 4 platforms with ge_platform node
+-->
+
+<node pkg="fleet" type="gazebo_server_node" name="platform" args="4"/> 
+
+<launch>
+<include file="$(find fleet_worlds)/launch/start.launch"/> 
+   <arg name="model" default="$(find hector_quadrotor_description)/urdf/quadrotor.gazebo.xacro" />
+
+
+<include file="$(find ge_platform)/launch/create_platform.launch"> 
+	<arg name="id" value="1" />
+	<arg name="x" value="1" />
+   	<arg name="y" value="0" />
+	<arg name="RunNode" value = "1" />
+</include>
+<include file="$(find ge_platform)/launch/create_platform.launch"> 
+	<arg name="id" value="2" />
+	<arg name="x" value="2" />
+   	<arg name="y" value="0" />
+	<arg name="RunNode" value = "1" />
+</include>
+<include file="$(find ge_platform)/launch/create_platform.launch"> 
+	<arg name="id" value="3" />
+	<arg name="x" value="0" />
+   	<arg name="y" value="1" />
+	<arg name="RunNode" value = "1" />
+</include>
+<include file="$(find ge_platform)/launch/create_platform.launch"> 
+	<arg name="id" value="4" />
+	<arg name="x" value="0" />
+   	<arg name="y" value="0" />
+	<arg name="RunNode" value = "1" />
+</include>
+
+</launch>
+
