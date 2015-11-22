@@ -29,7 +29,7 @@ Eclipse
 	# check the request project from list
 	# Debug configuration->
 		c/c++ Application: /ws/devel/lib/<package>/<node>
-	# Properties -> c/c++ Make Project -> Environment:
+	# Properties -> c/c++ Make Project -> Environment: (18/11/15 - Debug package without theses parameters)
 		- ROS_ROOT
 		- ROS_PACKAGE_PATH
 		- PYTHONPATH

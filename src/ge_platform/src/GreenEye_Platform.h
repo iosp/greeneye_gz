@@ -32,8 +32,8 @@ class GreenEye_Platform
 
 	typedef enum
 	{
-		FLIGHT_AT_HOME = 0,
-		FLIGHT_TO_WP,
+		FLIGHT_WAIT = 0,
+		FLIGHT_FLY,
 		FLIGHT_HOLD,
 		FLIGHT_END
 	} FLIGHT_STATE;

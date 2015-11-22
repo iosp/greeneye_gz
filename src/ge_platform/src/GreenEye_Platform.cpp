@@ -66,7 +66,7 @@ bool GreenEye_Platform::Init()
 
 	m_MsgTxCounter = 0;
 
-	m_FlightState = FLIGHT_AT_HOME;
+	m_FlightState = FLIGHT_WAIT;
 	//m_FlightMode = FLIGHT_MODE_MANUAL;
 	m_CurrentWpIndex = -1;
 	// Clear route
@@ -184,7 +184,7 @@ bool GreenEye_Platform::RcvRoute (char* a_buf)
 					RcvMsg->WP[i].TimeFromPlan );
 	}
 
-	m_FlightState = FLIGHT_TO_WP;
+	m_FlightState = FLIGHT_FLY;
 	m_State.m_MissionState = MISSION_STATE_STANDBY;
 
 	m_MissionStartTime = ros::Time::now();
@@ -206,7 +206,7 @@ bool GreenEye_Platform::RcvNewWP (char* a_buf)
 	m_Route[0] = RcvMsg->WP;
 	m_RouteLength = 1;
 
-	m_FlightState = FLIGHT_TO_WP;
+	m_FlightState = FLIGHT_FLY;
 	m_State.m_MissionState = MISSION_STATE_STANDBY;
 	m_MissionStartTime = ros::Time::now();
 	GotoNextWaypoint();
@@ -233,9 +233,11 @@ bool GreenEye_Platform::RcvSimCommand(char* a_buf)
 		m_CurrentWP.Position = m_State.Position;
 		m_CurrentWP.ASL = m_State.ASL;
 		m_SimState = SIMULATOR_STOP;
+		m_FlightState = FLIGHT_WAIT;
 		m_State.m_MissionState = MISSION_STATE_HOME;
 
-		SetVelocityCommand();
+// ### Removed at 19/11/15 - Reset shouldn't move the platform
+		//SetVelocityCommand();
 		break;
 
 	case GE_SIM_STOP:
@@ -347,7 +349,7 @@ void GreenEye_Platform::GotoNextWaypoint()
 				m_CurrentWP.Position.East,
 				m_CurrentWP.ASL,
 				m_CurrentWP.TimeFromPlan);
-		m_FlightState = FLIGHT_TO_WP;
+		m_FlightState = FLIGHT_FLY;
 
 		SetVelocityCommand();
 	}
@@ -365,101 +367,92 @@ void GreenEye_Platform::SetVelocityCommand()
 				deltaY,
 				deltaZ;
 
-	double MaxVel = 5;//0.4;
+	double MaxVel = 3;//0.4;
 	double MaxVelZ = 1;
 	double CloseDistToWP = 0.4;
 	geometry_msgs::Twist pubVel;
 	deltaX = m_CurrentWP.Position.North - m_State.Position.North;// m_PlatformState.pose.position.x;
 	deltaY = m_CurrentWP.Position.East - m_State.Position.East;//- m_PlatformState.pose.position.y;
 	deltaZ = m_CurrentWP.ASL - m_State.ASL;//- m_PlatformState.pose.position.z;
+	double dist = sqrt((deltaX * deltaX) + (deltaY * deltaY));
 
 	pubVel.linear.x = pubVel.linear.y = pubVel.linear.z = 0;
 
-	double dist = sqrt((deltaX * deltaX) + (deltaY * deltaY));
-
-	//struct timeval CurrentTime;
-	//gettimeofday (&CurrentTime, NULL);
-
-	//if (m_SimState == SIMULATOR_STOP)
-	//{
-		//m_VelPublish.publish(pubVel);
-	//}
-	//else
-	//{
-		// Check if reach destination
-		//if (abs(deltaX) < CloseDistToWP && abs(deltaY) < CloseDistToWP && abs (deltaZ) < CloseDistToWP)
-
-
-	if (dist <= CloseDistToWP && abs(deltaZ) <= CloseDistToWP)
+	// ### Added at 18/11/15 - no need to move platform if at home/end
+	if (m_FlightState == FLIGHT_WAIT || m_FlightState == FLIGHT_END)
 	{
-		switch (m_FlightState)
+		m_VelPublish.publish(pubVel);
+	}
+	else
+	{
+		// reach near the destination?
+		if (dist <= CloseDistToWP && abs(deltaZ) <= CloseDistToWP)
 		{
-			case FLIGHT_HOLD:
+			switch (m_FlightState)
 			{
-// ### Update 5/11/15 - Hold time is relative to re-plan time
-				ros::Duration DiffTime = ros::Time::now() - m_MissionStartTime;
-				if (DiffTime.sec >= m_CurrentWP.TimeFromPlan)
-					GotoNextWaypoint();
-				break;
-			}
-			case FLIGHT_AT_HOME:
-			case FLIGHT_TO_WP:
-				// reach to destination
-				if (m_CurrentWP.IsHoldState)
+				case FLIGHT_HOLD:
 				{
-					//m_StartHoldTime = m_State.SimTime;
-					//m_HoldTime.tv_sec = m_CurrentWP.TimeToWait;
-					m_FlightState = FLIGHT_HOLD;
-					m_VelPublish.publish(pubVel);
+					// ### Update 5/11/15 - Hold time is relative to re-plan time
+					ros::Duration DiffTime = ros::Time::now() - m_MissionStartTime;
+					if (DiffTime.sec >= m_CurrentWP.TimeFromPlan)
+						GotoNextWaypoint();
+					break;
+				}
+
+				case FLIGHT_FLY:
+				{
+					if (m_CurrentWP.IsHoldState)
+					{
+						m_FlightState = FLIGHT_HOLD;
+						m_VelPublish.publish(pubVel);
+					}
+					else
+						GotoNextWaypoint();
+					break;
+				}
+
+				default:
+					printf ("Mission state error\n");
+					break;
+			}
+		}
+		else // Set velocity to correct direction
+		{
+			double angle;
+			double CurVel;
+			// Is platform reach near its destination?
+			if (dist > CloseDistToWP)
+			{
+				if (deltaX == 0)
+				{
+					if (deltaY > 0)
+						angle = 3.1416/2.0;
+					else
+						angle = -3.1416/2.0;
 				}
 				else
-					GotoNextWaypoint();
-				break;
-			case FLIGHT_END:
-				// no more actions - stop platform
-				m_VelPublish.publish(pubVel);
-				break;
-			default:
-				printf ("Mission state error\n");
-				break;
+					angle = atan2(deltaY, deltaX);
+				if (angle < 0)
+					angle = 2 * 3.1416 + angle;
 
-		}
-
-	}
-	else // Set velocity to correct direction
-	{
-		double angle;
-		double CurVel;
-		if (dist > CloseDistToWP)
-		{
-			if (deltaX == 0)
-			{
-				if (deltaY > 0)
-					angle = 3.1416/2.0;
-				else
-					angle = -3.1416/2.0;
+				CurVel = min (dist, MaxVel);
+				pubVel.linear.x = CurVel* cos (angle);
+				pubVel.linear.y = CurVel* sin (angle);
+				printf ("(dist,ang) = (%.2f, %.2f) (velx,vely)= (%.2f, %.2f) \n", dist, angle, pubVel.linear.x, pubVel.linear.y);
 			}
 			else
-				angle = atan2(deltaY, deltaX);
-			if (angle < 0)
-				angle = 2 * 3.1416 + angle;
+			{
+				pubVel.linear.x = pubVel.linear.y = 0;
+				CurVel = min(abs(deltaZ), MaxVelZ);
+				if (deltaZ > CloseDistToWP)
+					pubVel.linear.z = CurVel;
+				if (deltaZ < -CloseDistToWP)
+					pubVel.linear.z = -CurVel;
+			}
 
-			CurVel = min (dist, MaxVel);
-			pubVel.linear.x = CurVel* cos (angle);
-			pubVel.linear.y = CurVel* sin (angle);
-			printf ("(dist,ang) = (%.2f, %.2f) (velx,vely)= (%.2f, %.2f) \n", dist, angle, pubVel.linear.x, pubVel.linear.y);
-		}
-		else
-		{
-			CurVel = min(abs(deltaZ), MaxVelZ);
-			if (deltaZ > CloseDistToWP)
-				pubVel.linear.z = CurVel;
-			if (deltaZ < -CloseDistToWP)
-				pubVel.linear.z = -CurVel;
-		}
-
-		m_VelPublish.publish(pubVel);
-	} // end of velocity update
+			m_VelPublish.publish(pubVel);
+		} // end of velocity update
+	}
 
 	m_State.Velocity.x = pubVel.linear.x;
 	m_State.Velocity.y = pubVel.linear.y;
